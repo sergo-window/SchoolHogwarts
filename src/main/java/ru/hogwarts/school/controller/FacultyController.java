@@ -3,10 +3,12 @@ package ru.hogwarts.school.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.dto.FacultyWithStudents;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.Collection;
+import java.util.List;
 
 
 @RestController
@@ -52,12 +54,35 @@ public class FacultyController {
         return ResponseEntity.ok(facultyService.getAllFaculties());
     }
 
-    @GetMapping("/color/{color}")
-    public ResponseEntity<Collection<Faculty>> getFacultiesByColor(@PathVariable String color) {
-        Collection<Faculty> faculties = facultyService.findByColor(color);
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Collection<Faculty>> getFacultiesByNameIgnoreCase(@PathVariable String name) {
+        Collection<Faculty> faculties = facultyService.findByNameIgnoreCase(name);
         if (faculties.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(faculties);
+    }
+
+    @GetMapping("/color-ignore-case/{color}")
+    public ResponseEntity<Collection<Faculty>> getFacultiesByColorIgnoreCase(@PathVariable String color) {
+        Collection<Faculty> faculties = facultyService.findByColorIgnoreCase(color);
+        if (faculties.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(faculties);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Collection<Faculty>> searchFaculties(@RequestParam String nameOrColor) {
+        Collection<Faculty> faculties = facultyService.findByNameOrColorIgnoreCase(nameOrColor);
+        if (faculties.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(faculties);
+    }
+
+    @GetMapping("/faculty-students")
+    public List<FacultyWithStudents> facultyWithStudents() {
+        return facultyService.facultyWithStudents();
     }
 }
