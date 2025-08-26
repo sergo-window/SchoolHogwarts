@@ -27,7 +27,7 @@ public class StudentService {
     }
 
     public Student findStudent(long id) {
-        return studentRepository.findById(id).get();
+        return studentRepository.findById(id).orElse(null);
     }
 
     public Student editStudent(Student student) {
@@ -54,12 +54,10 @@ public class StudentService {
         return studentRepository.findAll().stream()
                 .map(it -> {
                     Faculty faculty = it.getFaculty();
-                    return new StudentWithFaculty(
-                            it.getId(),
-                            it.getName(),
-                            it.getAge(),
-                            new FacultyWithoutStudents(faculty.getId(), faculty.getName(), faculty.getColor())
-                    );
+                    FacultyWithoutStudents facultyDto = faculty != null ?
+                            new FacultyWithoutStudents(faculty.getId(), faculty.getName(), faculty.getColor()) :
+                            null;
+                    return new StudentWithFaculty(it.getId(), it.getName(), it.getAge(), facultyDto);
                 })
                 .toList();
     }
