@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
 
@@ -26,6 +27,9 @@ public class StudentControllerWebTests {
     private StudentController studentController;
 
     @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
     private TestRestTemplate restTemplate;
 
     private String baseUrl;
@@ -33,6 +37,9 @@ public class StudentControllerWebTests {
 
     @BeforeEach
     void setUp() {
+
+        studentRepository.deleteAll();
+
         baseUrl = "http://localhost:" + port + "/student";
 
         testStudent = new Student();

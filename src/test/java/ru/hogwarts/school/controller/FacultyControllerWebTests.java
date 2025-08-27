@@ -9,6 +9,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.Collection;
 
@@ -24,6 +25,9 @@ public class FacultyControllerWebTests {
     private FacultyController facultyController;
 
     @Autowired
+    private FacultyRepository facultyRepository;
+
+    @Autowired
     private TestRestTemplate restTemplate;
 
     private String baseUrl;
@@ -31,6 +35,9 @@ public class FacultyControllerWebTests {
 
     @BeforeEach
     void setUp() {
+
+        facultyRepository.deleteAll();
+
         baseUrl = "http://localhost:" + port + "/faculty";
 
         testFaculty = new Faculty();
@@ -39,7 +46,7 @@ public class FacultyControllerWebTests {
     }
 
     @Test
-    void contextLoad() {
+    void contextLoad() throws Exception {
         Assertions.assertThat(facultyController).isNotNull();
     }
 
