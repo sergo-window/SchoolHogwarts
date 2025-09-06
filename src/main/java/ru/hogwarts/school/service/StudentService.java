@@ -61,4 +61,16 @@ public class StudentService {
                 })
                 .toList();
     }
+
+    public int getCountStudents() {
+        return studentRepository.getCountStudents();
+    }
+
+    public int getAverageAgeStudents() {
+        return studentRepository.getAverageAgeStudents();
+    }
+
+    public List<Student> getLastFiveStudents() {
+        return studentRepository.getLastFiveStudents();
+    }
 }
