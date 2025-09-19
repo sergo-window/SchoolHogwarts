@@ -10,13 +10,13 @@ public class InfoController {
     @Value("${server.port:0}")
     private int port;
 
+    @Value("${spring.profiles.active:default}")
+    private String activeProfile;
+
     @GetMapping("/port")
     public int getPort() {
         return port;
     }
-
-    @Value("${spring.profiles.active:default}")
-    private String activeProfile;
 
     @GetMapping("/profile")
     public String getActiveProfile() {
