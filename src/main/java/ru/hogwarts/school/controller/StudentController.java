@@ -1,5 +1,7 @@
 package ru.hogwarts.school.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/student")
 public class StudentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
+
     private final StudentService studentService;
 
     public StudentController(StudentService studentService) {
@@ -95,5 +100,32 @@ public class StudentController {
     public ResponseEntity<List<Student>> getLastFiveStudents() {
         List<Student> lastFive = studentService.getLastFiveStudents();
         return ResponseEntity.ok(lastFive);
+    }
+
+    @GetMapping("/names-starting-with-a")
+    public ResponseEntity<List<String>> getStudentNamesStartingWithA() {
+        List<String> studentNames = studentService.getStudentNamesStartingWithASorted();
+
+        if (studentNames.isEmpty()) {
+            logger.info("No students found with names starting with 'A'");
+            return ResponseEntity.notFound().build();
+        }
+
+        logger.info("Found {} students with names starting with 'A'", studentNames.size());
+        return ResponseEntity.ok(studentNames);
+    }
+
+    @GetMapping("/average-age-stream")
+    public ResponseEntity<Double> getAverageAgeWithStream() {
+        try {
+            Double averageAge = studentService.getAverageAgeWithStream();
+
+            logger.info("Average age calculated via Stream API: {}", averageAge);
+            return ResponseEntity.ok(averageAge);
+
+        } catch (Exception e) {
+            logger.error("Error calculating average age with Stream API: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

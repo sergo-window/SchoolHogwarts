@@ -176,4 +176,14 @@ public class FacultyService {
             throw new RuntimeException("Failed to retrieve faculties with students", e);
         }
     }
+
+    public String getLongestFacultyName() {
+        logger.info("Was invoked method for get longest faculty name");
+
+        return facultyRepository.findAll().stream()
+                .map(Faculty::getName)
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .max(java.util.Comparator.comparingInt(String::length))
+                .orElse("No faculties found");
+    }
 }

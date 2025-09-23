@@ -178,4 +178,40 @@ public class StudentService {
 
         return lastFiveStudents;
     }
+
+    public List<String> getStudentNamesStartingWithASorted() {
+        logger.info("Was invoked method for get student names starting with 'A' (both Latin and Cyrillic)");
+
+        return studentRepository.findAll().stream()
+                .map(Student::getName)
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .filter(name -> {
+                    String upperName = name.toUpperCase();
+                    return upperName.startsWith("A") || upperName.startsWith("А");
+                })
+                .sorted()
+                .map(String::toUpperCase)
+                .toList();
+    }
+
+    public Double getAverageAgeWithStream() {
+        logger.info("Was invoked method for get average age of students using Stream API");
+
+        List<Student> allStudents = studentRepository.findAll();
+        logger.debug("Processing {} students for average age calculation", allStudents.size());
+
+        if (allStudents.isEmpty()) {
+            logger.warn("No students found for average age calculation");
+            return 0.0;
+        }
+
+        double averageAge = allStudents.stream()
+                .filter(student -> student.getAge() > 0)
+                .mapToInt(Student::getAge)
+                .average()
+                .orElse(0.0);
+
+        logger.info("Average age calculated: {} (from {} students)", averageAge, allStudents.size());
+        return averageAge;
+    }
 }
