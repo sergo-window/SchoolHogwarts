@@ -1,5 +1,7 @@
 package ru.hogwarts.school.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/faculty")
 public class FacultyController {
+
+    private static final Logger logger = LoggerFactory.getLogger(FacultyController.class);
+
     private final FacultyService facultyService;
 
     public FacultyController(FacultyService facultyService) {
@@ -84,5 +89,24 @@ public class FacultyController {
     @GetMapping("/faculty-students")
     public List<FacultyWithStudents> facultyWithStudents() {
         return facultyService.facultyWithStudents();
+    }
+
+    @GetMapping("/longest-name")
+    public ResponseEntity<String> getLongestFacultyName() {
+        try {
+            String longestName = facultyService.getLongestFacultyName();
+
+            if ("No faculties found".equals(longestName)) {
+                logger.info("No faculties found when searching for longest name");
+                return ResponseEntity.notFound().build();
+            }
+
+            logger.info("Returning longest faculty name: {}", longestName);
+            return ResponseEntity.ok(longestName);
+
+        } catch (Exception e) {
+            logger.error("Error finding longest faculty name: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
