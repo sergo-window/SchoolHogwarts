@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 @RestController
@@ -30,9 +31,9 @@ public class InfoController {
     public Map<String, Object> getSumOriginal() {
         long startTime = System.currentTimeMillis();
 
-        int sum = Stream.iterate(1, a -> a + 1)
+        long sum = Stream.iterate(1L, a -> a + 1L)
                 .limit(1_000_000)
-                .reduce(0, Integer::sum);
+                .reduce(0L, Long::sum);
 
         long executionTime = System.currentTimeMillis() - startTime;
 
@@ -57,6 +58,23 @@ public class InfoController {
                 "execution_time_nanoseconds", executionTimeNanos,
                 "execution_time_milliseconds", executionTimeNanos / 1_000_000.0,
                 "formula", "n × (n + 1) ÷ 2 where n = 1,000,000"
+        );
+    }
+
+    @GetMapping("/sum/parallel")
+    public Map<String, Object> getSumParallel() {
+        long startTime = System.currentTimeMillis();
+
+        long sum = LongStream.rangeClosed(1, 1_000_000)
+                .parallel()
+                .sum();
+
+        long executionTime = System.currentTimeMillis() - startTime;
+
+        return Map.of(
+                "sum", sum,
+                "method", "parallel_stream",
+                "execution_time_ms", executionTime
         );
     }
 }
