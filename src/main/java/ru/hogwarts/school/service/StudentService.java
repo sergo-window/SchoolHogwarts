@@ -214,4 +214,161 @@ public class StudentService {
         logger.info("Average age calculated: {} (from {} students)", averageAge, allStudents.size());
         return averageAge;
     }
+
+    public List<String> getAllStudentNames() {
+        logger.info("Was invoked method for get all student names");
+
+        return studentRepository.findAll().stream()
+                .map(Student::getName)
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .toList();
+    }
+
+    public void printStudentsInParallel() {
+        logger.info("Was invoked method for print students in parallel");
+
+        List<String> studentNames = getAllStudentNames();
+
+        if (studentNames.isEmpty()) {
+            System.out.println("No students found in database");
+            return;
+        }
+
+        System.out.println("=== STARTING PARALLEL PRINTING ===");
+        System.out.println("Total students: " + studentNames.size());
+
+        if (!studentNames.isEmpty()) {
+            System.out.println("[MAIN THREAD] Student 1: " + studentNames.get(0));
+            sleep();
+        }
+        if (studentNames.size() >= 2) {
+            System.out.println("[MAIN THREAD] Student 2: " + studentNames.get(1));
+            sleep();
+        }
+
+        if (studentNames.size() >= 3) {
+            Thread thread1 = new Thread(() -> {
+                System.out.println("[PARALLEL THREAD 1] Student 3: " + studentNames.get(2));
+                sleep();
+                if (studentNames.size() >= 4) {
+                    System.out.println("[PARALLEL THREAD 1] Student 4: " + studentNames.get(3));
+                }
+            });
+            thread1.start();
+        }
+
+        if (studentNames.size() >= 5) {
+            Thread thread2 = new Thread(() -> {
+                System.out.println("[PARALLEL THREAD 2] Student 5: " + studentNames.get(4));
+                sleep();
+                if (studentNames.size() >= 6) {
+                    System.out.println("[PARALLEL THREAD 2] Student 6: " + studentNames.get(5));
+                }
+            });
+            thread2.start();
+        }
+
+        if (studentNames.size() > 6) {
+            Thread remainingThread = new Thread(() -> {
+                for (int i = 6; i < studentNames.size(); i++) {
+                    System.out.println("[REMAINING THREAD] Student " + (i + 1) + ": " + studentNames.get(i));
+                    sleep();
+                }
+            });
+            remainingThread.start();
+        }
+
+        System.out.println("=== PARALLEL PRINTING STARTED ===");
+    }
+
+    public synchronized void printStudentName(String studentName, int studentNumber, String threadName) {
+        try {
+            System.out.println("[" + threadName + "] Student " + studentNumber + ": " + studentName);
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Thread interrupted while printing student name", e);
+        }
+    }
+
+    public void printStudentsSynchronized() {
+        logger.info("Was invoked method for synchronized student printing with multiple threads");
+
+        List<String> studentNames = getAllStudentNames();
+
+        if (studentNames.isEmpty()) {
+            System.out.println("No students found in database");
+            return;
+        }
+
+        System.out.println("=== STARTING SYNCHRONIZED MULTI-THREAD PRINTING ===");
+        System.out.println("Total students: " + studentNames.size());
+
+        printFirstTwoStudentsInMainThread(studentNames);
+
+        startParallelThreads(studentNames);
+
+        System.out.println("=== ALL PRINTING TASKS STARTED ===");
+    }
+
+    private void printFirstTwoStudentsInMainThread(List<String> studentNames) {
+        System.out.println("[MAIN THREAD] Starting to print first two students");
+
+        if (!studentNames.isEmpty()) {
+            printStudentName(studentNames.get(0), 1, "MAIN THREAD");
+        }
+
+        if (studentNames.size() >= 2) {
+            printStudentName(studentNames.get(1), 2, "MAIN THREAD");
+        }
+
+        System.out.println("[MAIN THREAD] Completed printing first two students");
+    }
+
+    private void startParallelThreads(List<String> studentNames) {
+
+        if (studentNames.size() >= 3) {
+            Thread parallelThread1 = new Thread(() -> {
+                System.out.println("[PARALLEL THREAD 1] Starting");
+                printStudentName(studentNames.get(2), 3, "PARALLEL THREAD 1");
+                if (studentNames.size() >= 4) {
+                    printStudentName(studentNames.get(3), 4, "PARALLEL THREAD 1");
+                }
+                System.out.println("[PARALLEL THREAD 1] Completed");
+            });
+            parallelThread1.start();
+        }
+
+        if (studentNames.size() >= 5) {
+            Thread parallelThread2 = new Thread(() -> {
+                System.out.println("[PARALLEL THREAD 2] Starting");
+                printStudentName(studentNames.get(4), 5, "PARALLEL THREAD 2");
+                if (studentNames.size() >= 6) {
+                    printStudentName(studentNames.get(5), 6, "PARALLEL THREAD 2");
+                }
+                System.out.println("[PARALLEL THREAD 2] Completed");
+            });
+            parallelThread2.start();
+        }
+
+        if (studentNames.size() >= 7) {
+            Thread parallelThread3 = new Thread(() -> {
+                System.out.println("[PARALLEL THREAD 3] Starting");
+                for (int i = 6; i < studentNames.size(); i++) {
+                    printStudentName(studentNames.get(i), i + 1, "PARALLEL THREAD 3");
+                }
+                System.out.println("[PARALLEL THREAD 3] Completed");
+            });
+            parallelThread3.start();
+        }
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep((long) 1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Thread sleep interrupted", e);
+        }
+    }
 }

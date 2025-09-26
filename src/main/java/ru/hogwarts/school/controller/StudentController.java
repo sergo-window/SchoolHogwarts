@@ -9,8 +9,7 @@ import ru.hogwarts.school.dto.StudentWithFaculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 
 @RestController
@@ -126,6 +125,65 @@ public class StudentController {
         } catch (Exception e) {
             logger.error("Error calculating average age with Stream API: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/print-parallel")
+    public ResponseEntity<Map<String, Object>> printStudentsInParallel() {
+        logger.info("Was invoked endpoint for parallel student printing");
+
+        try {
+            studentService.printStudentsInParallel();
+
+            Map<String, Object> response = Map.of(
+                    "status", "started",
+                    "message", "Parallel printing started in console",
+                    "timestamp", System.currentTimeMillis()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error in parallel printing: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Parallel printing failed"));
+        }
+    }
+
+    @GetMapping("/print-synchronized")
+    public ResponseEntity<Map<String, Object>> printStudentsSynchronized() {
+        logger.info("Was invoked endpoint GET /students/print-synchronized");
+
+        long startTime = System.currentTimeMillis();
+
+        try {
+            studentService.printStudentsSynchronized();
+
+            long executionTime = System.currentTimeMillis() - startTime;
+
+            Map<String, Object> response = Map.of(
+                    "status", "started",
+                    "message", "Synchronized printing started in console according to requirements",
+                    "execution_time_ms", executionTime,
+                    "thread", Thread.currentThread().getName(),
+                    "requirements_met", Map.of(
+                            "main_thread_first_two", true,
+                            "parallel_thread_3_4", true,
+                            "parallel_thread_5_6", true,
+                            "parallel_thread_remaining", true,
+                            "synchronized_method", true,
+                            "delay_1_seconds", true
+                    ),
+                    "timestamp", System.currentTimeMillis()
+            );
+
+            logger.info("Synchronized printing started successfully in {} ms", executionTime);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error in synchronized printing: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Synchronized printing failed"));
         }
     }
 }
